@@ -1,0 +1,26 @@
+project_name: ml_refactoring_lecture
+experiment_name: image_classification
+track_in_clearml: true
+trainer_config:
+  min_epochs: 7
+  max_epochs: 100
+  check_val_every_n_epoch: 3
+  log_every_n_steps: 50
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  deterministic: false
+  fast_dev_run: false
+  default_root_dir: null
+  detect_anomaly: false
+data_config:
+  dataset_name: ml_refactoring_lecture_dataset
+  img_size:
+  - 64
+  - 64
+  batch_size: 32
+  data_split:
+  - 0.7
+  - 0.2
+  - 0.1
+  num_workers: 0
+  pin_memory: true

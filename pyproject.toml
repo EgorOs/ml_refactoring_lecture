@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "ML refactoring lecture"
+version = "0.1.0"
+description = ""
+authors = ["Egor Osinkin <egor.os.ink@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.*"
+opencv-python-headless = "^4.7.0.72"
+clearml = ">=1.10.4"
+lightning = ">=2.0.6"
+torch = ">=2.0.0,<2.0.1 || >2.0.1"  # Should exclude 2.0.1 due to the bug: https://stackoverflow.com/questions/76327419/valueerror-libcublas-so-0-9-not-found-in-the-system-path
+omegaconf = ">=2.3.0"
+pydantic = ">=2.1.1"
+albumentations = ">=1.3.1"
+torchvision = ">=0.15.0"
+timm = ">=0.9.6"
+torchmetrics = ">=1.1.1"
+tensorboard = ">=2.14.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.2.1"
+wemake-python-styleguide = "^0.17.0"
+vulture = "^2.7"
+pytest = "^7.3.1"
+
+[tool.poetry.group.notebooks]
+optional = true
+
+[tool.poetry.group.notebooks.dependencies]
+jupyterlab = "3.6.3"
+jupyterlab-lsp = "4.0.1"
+python-lsp-server = {version = "1.7.2", extras = ["python"]}
+matplotlib = "^3.7.1"
+ipywidgets = "^8.0.6"
+ipyplot = "^1.1.1"
+
+[tool.vulture]
+min_confidence = 80
+paths = ["src"]
+ignore_names = ["args", "kwargs", "batch_idx"]
+sort_by_size = true
+verbose = false
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

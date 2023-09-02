@@ -1,0 +1,49 @@
+default_language_version:
+  python: python3.10
+repos:
+  - repo: local
+    hooks:
+    - id: flake8
+      name: flake8
+      description: wemake-python-styleguide enforcement
+      entry: flake8
+      args: ["--config=setup.cfg"]
+      language: python
+      types: [python]
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 'v2.7'
+    hooks:
+      - id: vulture
+  - repo: 'https://github.com/pre-commit/pre-commit-hooks'
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=2048']
+      - id: check-toml
+      - id: check-yaml
+        args:
+          - '--unsafe'
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: double-quote-string-fixer
+  - repo: 'https://github.com/pycqa/isort'
+    rev: 5.12.0
+    hooks:
+      - id: isort
+  - repo: 'https://github.com/psf/black'
+    rev: 23.1.0
+    hooks:
+      - id: black
+        args: ["--skip-string-normalization", "--line-length=120"]
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v2.5.1
+    hooks:
+      - id: add-trailing-comma
+  - repo: 'https://github.com/executablebooks/mdformat'
+    rev: 0.7.16
+    hooks:
+      - id: mdformat
+  - repo: 'https://github.com/kynan/nbstripout'
+    rev: 0.6.1
+    hooks:
+      - id: nbstripout
