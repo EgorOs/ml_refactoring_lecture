@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 import torch
 from clearml import Dataset as ClearmlDataset
@@ -25,10 +25,18 @@ class ClassificationDataModule(LightningDataModule):
         self.save_hyperparameters(logger=False)
 
         self.data_path: Optional[Path] = None
+        self.initialized = False
 
         self.data_train: Optional[ClassificationDataset] = None
         self.data_val: Optional[ClassificationDataset] = None
         self.data_test: Optional[ClassificationDataset] = None
+
+    @property
+    def class_to_idx(self) -> Dict[str, int]:
+        if not self.initialized:
+            self.prepare_data()
+            self.setup('test')
+        return self.data_test.class_to_idx
 
     def prepare_data(self):
         self.data_path = (
@@ -43,6 +51,7 @@ class ClassificationDataModule(LightningDataModule):
             )  # FIXME: make configurable
         elif stage == 'test':
             self.data_test = ClassificationDataset(str(self.data_path / 'test'), transform=self._valid_transforms)
+        self.initialized = True
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
