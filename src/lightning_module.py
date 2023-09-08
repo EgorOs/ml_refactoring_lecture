@@ -8,6 +8,7 @@ from torchmetrics import MeanMetric
 
 from src.metrics import get_metrics
 from src.model import CNN
+from src.schedulers import get_cosine_schedule_with_warmup
 
 
 class ClassificationLightningModule(LightningModule):
@@ -63,12 +64,13 @@ class ClassificationLightningModule(LightningModule):
         self.log_dict(self._valid_metrics.compute(), prog_bar=True, on_epoch=True)
         self._valid_metrics.reset()
 
-    def test_step(self, batch: List[Tensor], batch_idx: int) -> None:
+    def test_step(self, batch: List[Tensor], batch_idx: int) -> Tensor:
         images, targets = batch
         logits = self(images)
 
         preds = torch.argmax(logits, dim=1)
         self._test_metrics(preds, targets)
+        return preds
 
     def on_test_epoch_end(self) -> None:
         self.log_dict(self._test_metrics.compute(), prog_bar=True, on_epoch=True)
@@ -77,20 +79,17 @@ class ClassificationLightningModule(LightningModule):
     def configure_optimizers(self) -> dict:
         # TODO: parametrize optimizer and lr scheduler.
         optimizer = torch.optim.SGD(self.parameters(), lr=2e-3)  # noqa: WPS432 will be parametrized
-        # scheduler = get_cosine_schedule_with_warmup(
-        #     optimizer,
-        #     num_warmup_steps=70,  # noqa: WPS432 will be parametrized
-        #     num_training_steps=self.trainer.estimated_stepping_batches,
-        #     num_cycles=0.4,  # noqa: WPS432 will be parametrized
-        # )
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=200,  # noqa: WPS432 will be parametrized
+            num_training_steps=self.trainer.estimated_stepping_batches,
+            num_cycles=0.4,  # noqa: WPS432 will be parametrized
+        )
         return {
             'optimizer': optimizer,
-            # 'lr_scheduler': {
-            #     'scheduler': scheduler,
-            #     'interval': 'step',
-            #     'frequency': 1,
-            # },
+            'lr_scheduler': {
+                'scheduler': scheduler,
+                'interval': 'step',
+                'frequency': 1,
+            },
         }
-
-    # TODO: try built in ONNX export
-    # def to_onnx(self, file_path: Union[str, Path], input_sample: Optional[Any] = None, **kwargs: Any) -> None:
