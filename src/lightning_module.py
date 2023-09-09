@@ -6,13 +6,25 @@ from lightning import LightningModule
 from torch import Tensor
 from torchmetrics import MeanMetric
 
+from src.metrics import get_metrics
 from src.model import CNN
 
 
 class ClassificationLightningModule(LightningModule):
-    def __init__(self):
+    def __init__(self, class_to_idx: Dict[str, int]):
         super().__init__()
         self._train_loss = MeanMetric()
+        self._valid_loss = MeanMetric()
+
+        metrics = get_metrics(
+            num_classes=len(class_to_idx),
+            num_labels=len(class_to_idx),
+            task='multiclass',
+            average='macro',
+
+        )
+        self._valid_metrics = metrics.clone(prefix='valid_')
+        self._test_metrics = metrics.clone(prefix='test_')
 
         self.model = CNN()
 
@@ -35,10 +47,32 @@ class ClassificationLightningModule(LightningModule):
         self._train_loss.reset()
 
     def validation_step(self, batch: List[Tensor], batch_idx: int) -> None:
-        pass
+        images, targets = batch
+        logits = self(images)
+        probs = func.softmax(logits, dim=1)
+        loss = func.cross_entropy(probs, targets)
+        self._valid_loss(loss)
+
+        preds = torch.argmax(logits, dim=1)
+        self._valid_metrics(preds, targets)
+
+    def on_validation_epoch_end(self) -> None:
+        self.log('mean_valid_loss', self._valid_loss.compute(), on_step=False, prog_bar=True, on_epoch=True)
+        self._valid_loss.reset()
+
+        self.log_dict(self._valid_metrics.compute(), prog_bar=True, on_epoch=True)
+        self._valid_metrics.reset()
 
     def test_step(self, batch: List[Tensor], batch_idx: int) -> None:
-        pass
+        images, targets = batch
+        logits = self(images)
+
+        preds = torch.argmax(logits, dim=1)
+        self._test_metrics(preds, targets)
+
+    def on_test_epoch_end(self) -> None:
+        self.log_dict(self._test_metrics.compute(), prog_bar=True, on_epoch=True)
+        self._test_metrics.reset()
 
     def configure_optimizers(self) -> dict:
         # TODO: parametrize optimizer and lr scheduler.
