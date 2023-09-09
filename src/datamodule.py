@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 import torch
 from clearml import Dataset as ClearmlDataset
@@ -11,7 +11,7 @@ from src.dataset import ClassificationDataset
 from src.transform import get_train_transforms, get_valid_transforms
 
 
-class ClassificationDataModule(LightningDataModule):
+class ClassificationDataModule(LightningDataModule):  # noqa: WPS214
     def __init__(
         self,
         cfg: DataConfig,
@@ -38,6 +38,10 @@ class ClassificationDataModule(LightningDataModule):
             self.setup('test')
         return self.data_test.class_to_idx
 
+    @property
+    def idx_to_class(self) -> Dict[int, str]:
+        return {idx: cl for cl, idx in self.class_to_idx.items()}
+
     def prepare_data(self):
         self.data_path = (
             Path(ClearmlDataset.get(dataset_name=self.cfg.dataset_name).get_local_copy()) / 'Classification_data'
@@ -46,9 +50,12 @@ class ClassificationDataModule(LightningDataModule):
     def setup(self, stage: str):
         if stage == 'fit':
             all_data = ClassificationDataset(str(self.data_path / 'train'), transform=self._train_transforms)
-            self.data_train, self.data_val = torch.utils.data.random_split(
-                all_data, [11228, 2806],
-            )  # FIXME: make configurable
+            train_split = int(len(all_data) * self.cfg.data_split[0])
+            val_split = len(all_data) - train_split
+            self.data_train, self.data_val = torch.utils.data.random_split(  # noqa: WPS414
+                all_data,
+                [train_split, val_split],
+            )
         elif stage == 'test':
             self.data_test = ClassificationDataset(str(self.data_path / 'test'), transform=self._valid_transforms)
         self.initialized = True

@@ -8,9 +8,10 @@ from torchmetrics import MeanMetric
 
 from src.metrics import get_metrics
 from src.model import CNN
+from src.schedulers import get_cosine_schedule_with_warmup
 
 
-class ClassificationLightningModule(LightningModule):
+class ClassificationLightningModule(LightningModule):  # noqa: WPS214
     def __init__(self, class_to_idx: Dict[str, int]):
         super().__init__()
         self._train_loss = MeanMetric()
@@ -21,7 +22,6 @@ class ClassificationLightningModule(LightningModule):
             num_labels=len(class_to_idx),
             task='multiclass',
             average='macro',
-
         )
         self._valid_metrics = metrics.clone(prefix='valid_')
         self._test_metrics = metrics.clone(prefix='test_')
@@ -50,8 +50,7 @@ class ClassificationLightningModule(LightningModule):
         images, targets = batch
         logits = self(images)
         probs = func.softmax(logits, dim=1)
-        loss = func.cross_entropy(probs, targets)
-        self._valid_loss(loss)
+        self._valid_loss(func.cross_entropy(probs, targets))
 
         preds = torch.argmax(logits, dim=1)
         self._valid_metrics(preds, targets)
@@ -63,12 +62,13 @@ class ClassificationLightningModule(LightningModule):
         self.log_dict(self._valid_metrics.compute(), prog_bar=True, on_epoch=True)
         self._valid_metrics.reset()
 
-    def test_step(self, batch: List[Tensor], batch_idx: int) -> None:
+    def test_step(self, batch: List[Tensor], batch_idx: int) -> Tensor:
         images, targets = batch
         logits = self(images)
 
         preds = torch.argmax(logits, dim=1)
         self._test_metrics(preds, targets)
+        return preds
 
     def on_test_epoch_end(self) -> None:
         self.log_dict(self._test_metrics.compute(), prog_bar=True, on_epoch=True)
@@ -76,18 +76,18 @@ class ClassificationLightningModule(LightningModule):
 
     def configure_optimizers(self) -> dict:
         # TODO: parametrize optimizer and lr scheduler.
-        optimizer = torch.optim.SGD(self.parameters(), lr=2e-3)  # noqa: WPS432 will be parametrized
-        # scheduler = get_cosine_schedule_with_warmup(
-        #     optimizer,
-        #     num_warmup_steps=70,  # noqa: WPS432 will be parametrized
-        #     num_training_steps=self.trainer.estimated_stepping_batches,
-        #     num_cycles=0.4,  # noqa: WPS432 will be parametrized
-        # )
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=2e-3)  # noqa: WPS432 will be parametrized
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=200,  # noqa: WPS432 will be parametrized
+            num_training_steps=self.trainer.estimated_stepping_batches,
+            num_cycles=0.4,  # noqa: WPS432 will be parametrized
+        )
         return {
             'optimizer': optimizer,
-            # 'lr_scheduler': {
-            #     'scheduler': scheduler,
-            #     'interval': 'step',
-            #     'frequency': 1,
-            # },
+            'lr_scheduler': {
+                'scheduler': scheduler,
+                'interval': 'step',
+                'frequency': 1,
+            },
         }
