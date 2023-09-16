@@ -5190,6 +5190,17 @@ typing-extensions = "*"
 opt-einsum = ["opt-einsum (>=3.3)"]
 
 [[package]]
+name = "torchinfo"
+version = "1.8.0"
+description = "Model summary in PyTorch, based off of the original torchsummary."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "torchinfo-1.8.0-py3-none-any.whl", hash = "sha256:2e911c2918603f945c26ff21a3a838d12709223dc4ccf243407bce8b6e897b46"},
+    {file = "torchinfo-1.8.0.tar.gz", hash = "sha256:72e94b0e9a3e64dc583a8e5b7940b8938a1ac0f033f795457f27e6f4e7afa2e9"},
+]
+
+[[package]]
 name = "torchmetrics"
 version = "1.1.1"
 description = "PyTorch native Metrics"
@@ -5901,4 +5912,4 @@ test = ["mypy", "pre-commit", "pytest", "pytest-asyncio", "websockets (>=10.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "7a2672f990661ae66eaf09548b07c641fc3e05878aec52fb0db9d2a7c33a7396"
+content-hash = "dfcebbf62c54136e794733c3b4884361f03712bb61cd4294cde0a9e10f85ea28"

@@ -36,8 +36,7 @@ class ClassificationLightningModule(LightningModule):  # noqa: WPS214
     def training_step(self, batch: List[Tensor]) -> Dict[str, Tensor]:  # noqa: WPS210
         images, targets = batch
         logits = self(images)
-        probs = func.softmax(logits, dim=1)
-        loss = func.cross_entropy(probs, targets)
+        loss = func.cross_entropy(logits, targets)
         self._train_loss(loss)
         self.log('step_loss', loss, on_step=True, prog_bar=True, logger=True)
         return {'loss': loss}
@@ -49,11 +48,9 @@ class ClassificationLightningModule(LightningModule):  # noqa: WPS214
     def validation_step(self, batch: List[Tensor], batch_idx: int) -> None:
         images, targets = batch
         logits = self(images)
-        probs = func.softmax(logits, dim=1)
-        self._valid_loss(func.cross_entropy(probs, targets))
+        self._valid_loss(func.cross_entropy(logits, targets))
 
-        preds = torch.argmax(logits, dim=1)
-        self._valid_metrics(preds, targets)
+        self._valid_metrics(logits, targets)
 
     def on_validation_epoch_end(self) -> None:
         self.log('mean_valid_loss', self._valid_loss.compute(), on_step=False, prog_bar=True, on_epoch=True)
@@ -67,7 +64,7 @@ class ClassificationLightningModule(LightningModule):  # noqa: WPS214
         logits = self(images)
 
         preds = torch.argmax(logits, dim=1)
-        self._test_metrics(preds, targets)
+        self._test_metrics(logits, targets)
         return preds
 
     def on_test_epoch_end(self) -> None:

@@ -4,6 +4,7 @@ import lightning
 from lightning import Trainer
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
+from src.callbacks.debug import LogModelSummary, VisualizeBatch
 from src.callbacks.experiment_tracking import (
     ClearMLTracking,
     LogConfusionMatrix,
@@ -19,6 +20,8 @@ def train(cfg: ExperimentConfig):
     datamodule = ClassificationDataModule(cfg=cfg.data_config)
 
     callbacks = [
+        LogModelSummary(),
+        VisualizeBatch(every_n_epochs=5),
         LearningRateMonitor(logging_interval='step'),
         ModelCheckpoint(save_top_k=3, monitor='valid_f1', mode='max', every_n_epochs=1),
     ]
