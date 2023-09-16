@@ -42,3 +42,7 @@ migrate_dataset:
 
 run_training:
 	poetry run $(PYTHON_EXEC) -m src.train
+
+
+local_test:
+	poetry run $(PYTHON_EXEC) -m pytest tests
