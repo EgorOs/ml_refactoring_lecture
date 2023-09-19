@@ -56,6 +56,7 @@ class ClassificationDataModule(LightningDataModule):  # noqa: WPS214
                 all_data,
                 [train_split, val_split],
             )
+            self.data_val.transform = self._valid_transforms
         elif stage == 'test':
             self.data_test = ClassificationDataset(str(self.data_path / 'test'), transform=self._valid_transforms)
         self.initialized = True
