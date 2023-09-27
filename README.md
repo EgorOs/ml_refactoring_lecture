@@ -1,10 +1,29 @@
 # Lecture: Refactoring Jupyter notebook to Python project
 
-The purpose of this live-coding series is to take a simple model trained in Jupyter notebook
-and refactor it into a nice Python project. We demonstrate how good coding
-practices can be applied in Deep Learning domain.
-These series are non-exhaustive and serve as an entrypoint for those who are curious about `MLOps` and `PytorchLightning`.
+<div style="text-align: left; display: flex; grid-template-columns: 1fr 1fr;">
 
+<div style="min-width: 132px">
+
+<img src=media/pimp_my_jupyter.png height="187px" style="margin: 16px 0px 0px 0px">
+
+</div>
+
+<div>
+
+```html
+
+   The purpose of this live-coding series is to take a
+   simple model trained in Jupyter notebook and refactor
+   it into a nice Python project. We demonstrate how
+   good coding practices can be applied in
+   Deep Learning domain. These series are
+   non-exhaustive and serve as an entrypoint for those who
+   are curious about `MLOps` and `PytorchLightning`.
+
+```
+
+</div>
+</div>
 <a href="https://www.pytorchlightning.ai/index.html"><img alt="PytorchLightning" src="https://img.shields.io/badge/PytorchLightning-7930e3?logo=lightning&style=flat"></a>
 <a href="https://clear.ml/docs/latest/"><img alt="Config: Hydra" src="https://img.shields.io/badge/MLOps-Clear%7CML-%2309173c"></a>
 
